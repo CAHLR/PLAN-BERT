@@ -22,7 +22,7 @@ REQUIRED = [
     'Keras==2.3.1',
     'numpy',
     'pandas',
-    'tensorflow-gpu==2.2.0',
+    'tensorflow-gpu',
     'tqdm']
 
 EXTRAS = {}
