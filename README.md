@@ -87,6 +87,6 @@ predict = planbert.predict(test_csv, 'time', 9) # [Testing set, PLAN-BERT's mode
         | 0  0  0  0  0  1 |
         | 0  0  1  0  0  0 |   
 
-The above example shows the schedule of one user. It is of shape [5, 6], in which 5 is the number of time slots, 6 is the number of items. Similarly, the output of PLAN-BERT is of shape [ B, T, I ], where B is the number of users, T is the number of time slots, I is the number of items.
+The above example shows the schedule of one user. It is of shape [5, 6], in which 5 is the number of time slots, 6 is the number of items. Similarly, the output of PLAN-BERT is of shape [ U, T, I ], where U is the number of users, T is the number of time slots, I is the number of items.
   
   
