@@ -45,12 +45,13 @@ The accepted input formats are Pandas DataFrames. The first three columns denote
 
 | 'user' | 't' | 'item' | 'feat_1' | 'feat_2' | ... |
 |:------:|:---:|:------:|:--------:|:--------:|:---:|
-| User1  | t1. | item1. |          |          |     |
-| User1  | t1. | item2. |          |          |     |
-| User1  | t2. | item3. |          |          |     |
-| User1  | t2. | item2. |          |          |     |
-| User1  | t3. | item4. |          |          |     |
-| User2  | t1. | item1. |          |          |     |
+| User1  | t1  | item1  |          |          |     |
+| User1  | t1  | item2  |          |          |     |
+| User1  | t2  | item3  |          |          |     |
+| User1  | t2  | item2  |          |          |     |
+| User1  | t3  | item4  |          |          |     |
+| User2  | t1  | item1  |          |          |     |
+| ...    |     |        |          |          |     |
 
 ## Creating and Training Models ##
 
