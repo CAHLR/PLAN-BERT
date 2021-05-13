@@ -76,9 +76,9 @@ planbert = PLANBERT(25, 10000, [5507, 69], 0) # [ Number of time slots, Number o
 planbert.fit(train_csv, valid_csv)
 planbert.test(test_csv, h_list=[9], r_list=[3], pool_size=25)
 
-# Obtain the output schedule. We note that the test_csv should only include historical items and future reference items. We should sample test_csv before feeding it into PLANBERT.predict.
+# Obtain the output schedule. We note that the test_csv should only include historical items and future reference items. We should sample test_csv before feeding it into planbert.predict.
 predict = planbert.predict(test_csv, 'time', 9) # [Testing set, PLAN-BERT's mode ('time'/'wishlist'), Number of historical time slots]
-
+```
 # Internal Data Format #
 
         | 0  0  0  0  1  0 |
