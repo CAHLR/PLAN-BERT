@@ -1,5 +1,7 @@
 import tensorflow as tf
 import numpy as np
+import pandas as pd
+from tqdm import trange
 import sys, os, pickle, importlib, keras, random, tqdm, copy, json, time, argparse
 from keras import backend as K
 
@@ -7,6 +9,18 @@ import PLANBERT.Engine as Engine
 import PLANBERT.util.Datahelper as dh
 import PLANBERT.util.Generator as Generator
 import PLANBERT.model.PLANBERT as Transformer
+
+
+def dataframe2dict(csv):
+    user_dict = {}
+    for iter in trange(csv.shape[0]):
+        user = int(csv.iloc[iter][0])
+        if user not in user_dict:
+            user_dict[user] = []
+        user_dict[user].append(list(csv.iloc[iter][1:]))
+    for key in user_dict:
+        user_dict[key] = np.array(user_dict[key])
+    return user_dict
 
 
 class PLANBERT:
@@ -65,9 +79,21 @@ class PLANBERT:
             self.model.load_weights(self.__checkpoint)
 
     def fit(
-        self, train_dict, valid_dict, pt_percentage=0.8,
+        self, train_data, valid_data, pt_percentage=0.8,
         nonimprove_limit=10, batch_size=32, shuffle=True, fixed_seed=False, epoch_limit=500
     ):
+        if type(train_data) == pd.DataFrame:
+            train_dict = dataframe2dict(train_data)
+        else:
+            assert type(train_data) == dict
+            train_dict = train_data
+            
+        if type(valid_data) == pd.DataFrame:
+            valid_dict = dataframe2dict(valid_data)
+        else:
+            assert type(valid_data) == dict
+            valid_dict = valid_data
+        
         train_generator_config = {
             'name': None,
             'pool_sampling': False,
@@ -117,7 +143,13 @@ class PLANBERT:
         self.model.save_weights(path)
 
 
-    def predict(self, test_dict, mode, num_history, batch_size=16):
+    def predict(self, test_data, mode, num_history, batch_size=16):
+        if type(test_data) == pd.DataFrame:
+            test_dict = dataframe2dict(test_data)
+        else:
+            assert type(test_data) == dict
+            test_dict = test_data
+            
         assert(mode in ['time', 'wishlist'])
         test_generator_config = {'name':'None', 'pool_sampling': False, 'batch_size': batch_size, 'shuffle': False, 'fixed_seed': True}
         test_generator_config['sample_func'] = '(lambda x:x)'
@@ -127,7 +159,13 @@ class PLANBERT:
         return Engine.predict(self.model, test_generator, pred_window=[num_history, self.__num_times])
 
 
-    def test(self, test_dict, h_list, r_list, pool_size=None, batch_size=16):
+    def test(self, test_data, h_list, r_list, pool_size=None, batch_size=16):
+        if type(test_data) == pd.DataFrame:
+            test_dict = dataframe2dict(test_data)
+        else:
+            assert type(test_data) == dict
+            test_dict = test_data
+            
         if pool_size==None:
             pool_size=np.max(r_list)
         test_generator_config = {
