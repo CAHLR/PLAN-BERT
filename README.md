@@ -72,7 +72,7 @@ test_csv = pd.read_csv('example/example_train.csv')
 planbert.test(test_csv, h_list=[9], r_list=[3], pool_size=25)
 
 # Train a PLAN-BERT with training set and validation set without checkpoint.
-planbert = PLANBERT(25, 10000, [5507, 69], 0) # [ Number of time slots, Number of Items, [Number of features], ID of GPU]
+planbert = PLANBERT(25, 10000, [5507, 69], 0) # [ Number of time slots, Number of items, [Number of features], ID of GPU]
 planbert.fit(train_csv, valid_csv)
 planbert.test(test_csv, h_list=[9], r_list=[3], pool_size=25)
 
@@ -87,6 +87,6 @@ predict = planbert.predict(test_csv, 'time', 9) # [Testing set, PLAN-BERT's mode
         | 0  0  0  0  0  1 |
         | 0  0  1  0  0  0 |   
 
-The above example shows the schedule of one user. It is of shape [5, 6], in which 5 is the number of time slots, 6 is the number of items. Similarly, the output of PLAN-BERT is of shape [ B, T, I ], where B is the number of users.
+The above example shows the schedule of one user. It is of shape [5, 6], in which 5 is the number of time slots, 6 is the number of items. Similarly, the output of PLAN-BERT is of shape [ B, T, I ], where B is the number of users, T is the number of time slots, I is the number of items.
   
   
