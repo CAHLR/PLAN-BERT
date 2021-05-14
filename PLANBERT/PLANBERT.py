@@ -5,10 +5,10 @@ from tqdm import trange
 import sys, os, pickle, importlib, keras, random, tqdm, copy, json, time, argparse
 from keras import backend as K
 
-import PLANBERT.Engine as Engine
-import PLANBERT.util.Datahelper as dh
-import PLANBERT.util.Generator as Generator
-import PLANBERT.model.PLANBERT as Transformer
+from . import Engine
+from .util import Datahelper as dh
+from .util import Generator as Generator
+from .model import PLANBERT as Transformer
 
 
 def dataframe2dict(csv):
@@ -87,13 +87,13 @@ class PLANBERT:
         else:
             assert type(train_data) == dict
             train_dict = train_data
-            
+
         if type(valid_data) == pd.DataFrame:
             valid_dict = dataframe2dict(valid_data)
         else:
             assert type(valid_data) == dict
             valid_dict = valid_data
-        
+
         train_generator_config = {
             'name': None,
             'pool_sampling': False,
@@ -149,7 +149,7 @@ class PLANBERT:
         else:
             assert type(test_data) == dict
             test_dict = test_data
-            
+
         assert(mode in ['time', 'wishlist'])
         test_generator_config = {'name':'None', 'pool_sampling': False, 'batch_size': batch_size, 'shuffle': False, 'fixed_seed': True}
         test_generator_config['sample_func'] = '(lambda x:x)'
@@ -165,7 +165,7 @@ class PLANBERT:
         else:
             assert type(test_data) == dict
             test_dict = test_data
-            
+
         if pool_size==None:
             pool_size=np.max(r_list)
         test_generator_config = {

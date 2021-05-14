@@ -1,6 +1,6 @@
 import keras.callbacks as callbacks
 import math, copy, random, os
-import PLANBERT.util.Metrics as Metrics
+from .util import Metrics
 import tensorflow as tf
 import numpy as np
 from tqdm import tqdm
@@ -78,22 +78,22 @@ def fit(model, train_generator, valid_generator, epoch_limit=200, loss_nonimprov
         model_callbacks.append(callbacks.ModelCheckpoint(model_save_path, monitor='val_recall_at_10', mode='max', save_best_only=True, verbose=True))
 
     model_history = model.fit_generator(
-        generator=train_generator, 
+        generator=train_generator,
         validation_data=valid_generator,
-        epochs=epoch_limit, 
+        epochs=epoch_limit,
         callbacks=model_callbacks,
         use_multiprocessing=True,
         workers=5)
 
     best_accuracy = max(model_history.history[metric])
     print("Best accuracy:", best_accuracy)
-    
+
 
 def test(model, generator, pred_window):
     target_list, predict_list = [], []
     for iter, batch in enumerate(tqdm(generator, ncols=60)):
         if iter == len(generator): break
-        
+
         predict = model.predict_on_batch(batch[0])[0]
         target_list.append(batch[0][-1][:, pred_window[0]:pred_window[1]])
         predict_list.append(predict[:, pred_window[0]:pred_window[1]])
@@ -124,7 +124,7 @@ def test_wishlist(model, generator, pred_window):
         for user in range(generator.batch_size):
             temp_wish_list = np.where(wish_list[user])[0]
             batch[0][0][user, pred_window[0] + rank[user, temp_wish_list], temp_wish_list] = 1
-            
+
         predict = model.predict_on_batch(batch[0])[0]
         target_list.append(batch[0][-1][:, pred_window[0]:pred_window[1]])
         predict_list.append(predict[:, pred_window[0]:pred_window[1]])

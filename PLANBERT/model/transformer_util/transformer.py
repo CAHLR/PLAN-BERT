@@ -13,7 +13,7 @@ from keras import initializers
 from keras import backend as K
 from keras.utils import get_custom_objects
 
-from PLANBERT.model.transformer_util.attention import MultiHeadSelfAttention
+from .attention import MultiHeadSelfAttention
 
 
 def gelu(x):
@@ -179,7 +179,7 @@ class TransformerBlock:
                 compression_window_size=compression_window_size,
                 name='{}_self_attention'.format(name))
         else: self.attention_layer = attention_layer
-        
+
         self.norm1_layer = LayerNormalization(name='{}_normalization1'.format(name))
         self.dropout_layer_1 = (
             Dropout(residual_dropout, name='{}_dropout_1'.format(name))

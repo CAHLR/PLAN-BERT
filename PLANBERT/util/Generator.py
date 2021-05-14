@@ -2,7 +2,7 @@ import os, pickle, tqdm, keras, time
 import numpy as np
 import pandas as pd
 from copy import deepcopy
-import PLANBERT.util.Datahelper as dh
+from . import Datahelper as dh
 
 
 class TimeMultihotGenerator(keras.utils.Sequence):
