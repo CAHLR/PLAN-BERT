@@ -58,27 +58,21 @@ The accepted input formats are Pandas DataFrames. The first three columns denote
 The process of creating and training models in PLAN-BERT resemble that of SciKit Learn. 
 
 ```python
-from PLANBERT.PLANBERT import PLANBERT
-
-# Initialize the model with a saved checkpoint
-planbert = PLANBERT(25, 10000, [5507, 69], 0, checkpoint='example/example_ckpt.h5')
-
+from PLANBERT.Model import PLANBERT
 # Load the training, validation, and testing set.
 import pandas as pd
-train_csv = pd.read_csv('example/example_train.csv')
-valid_csv = pd.read_csv('example/example_valid.csv')
-test_csv = pd.read_csv('example/example_train.csv')
-
-# Test the saved checkpoint while providing the number of historical time slots and future items. PLAN-BERT-time and PLAN-BERT-wishlist will be tested at the same time.
-planbert.test(test_csv, h_list=[9], r_list=[3], pool_size=25)
+train_csv = pd.read_csv('../example/example_train.csv')
+valid_csv = pd.read_csv('../example/example_valid.csv')
+test_csv = pd.read_csv('../example/example_train.csv')
 
 # Train a PLAN-BERT with training set and validation set without checkpoint.
-planbert = PLANBERT(25, 10000, [5507, 69], 0) # [ Number of time slots, Number of items, [Number of features], ID of GPU]
+planbert = PLANBERT(0, 0, 0, 0, train_csv) # [ Number of time slots, Number of items, [Number of features], ID of GPU]
 planbert.fit(train_csv, valid_csv)
 planbert.test(test_csv, h_list=[9], r_list=[3], pool_size=25)
 
 # Obtain the output schedule. We note that the test_csv should only include historical items and future reference items. We should sample test_csv before feeding it into planbert.predict.
-predict = planbert.predict(test_csv, 'time', 9) # [Testing set, PLAN-BERT's mode ('time'/'wishlist'), Number of historical time slots]
+history_dict = {iter:6 for iter in test_csv['user'].unique()[:10]}
+predict = planbert.predict(test_csv, 'time', history_dict) # [Testing set, PLAN-BERT's mode ('time'/'wishlist'), Number of historical time slots]
 ```
 # Internal Data Format #
 
