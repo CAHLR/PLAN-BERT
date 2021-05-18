@@ -4,6 +4,7 @@ import pandas as pd
 from tqdm import trange
 import sys, os, pickle, importlib, keras, random, tqdm, copy, json, time, argparse
 from keras import backend as K
+from tqdm import tqdm
 
 from . import Engine
 from .util import Datahelper as dh
@@ -23,7 +24,7 @@ def dataframe2dict(csv):
     return user_dict
 
 
-class model:
+class PLANBERT:
     def __init__(self,
                  num_times, num_items, feat_dims, cuda_num, master_csv=None,
                  num_layers=2, num_hidden_dims=2**9, num_heads=8,
@@ -33,10 +34,11 @@ class model:
                  checkpoint=None
                 ):
 
-        if master_csv:
+        if type(master_csv) == pd.DataFrame:
             self.__num_times = master_csv.iloc[:, 1].max() + 1
             self.__num_items = master_csv.iloc[:, 2].max() + 1
-            self.__feat_dims = [master_csv.iloc[:, iter].max() + 1 for iter in range(3, master_csv.shape[1])]
+            self.__feat_dims = [
+                master_csv.iloc[:, iter].max() + 1 for iter in range(3, master_csv.shape[1])]
         else:
             self.__num_times = num_times
             self.__num_items = num_items
@@ -56,7 +58,8 @@ class model:
         self.__cuda_num = cuda_num
         self.__checkpoint = checkpoint
 
-        self.__model_config = {'num_times': self.__num_times, 'num_items': self.__num_items, 'feats': feat_dims}
+        self.__model_config = {
+            'num_times': self.__num_times, 'num_items': self.__num_items, 'feats': self.__feat_dims}
 
         # Training Environment
         os.environ['CUDA_VISIBLE_DEVICES'] = str(self.__cuda_num)
@@ -162,14 +165,19 @@ class model:
         test_generator_config = {'name':'None', 'pool_sampling': False, 'batch_size': 1, 'shuffle': False, 'fixed_seed': True}
 
         result_dict = {}
-        for iter in history_dict:
+        for iter in tqdm(history_dict):
             num_history = history_dict[iter]
             test_generator_config['sample_func'] = '(lambda x:x)'
             test_generator_config['history_func'] = '(lambda x:{})'.format(num_history)
             test_generator = Generator.TimeMultihotGenerator(
                 test_dict, [iter], self.__model_config, test_generator_config)
-            result_dict[iter] = Engine.predict(
-                self.model, test_generator, pred_window=[num_history, self.__num_times])
+            if mode == 'time':
+                result_dict[iter] = Engine.predict(
+                    self.model, test_generator, pred_window=[num_history, self.__num_times])
+            else:
+                result_dict[iter] = Engine.predict_wishlist(
+                    self.model, test_generator, pred_window=[num_history, self.__num_times])
+
         return result_dict
 
 

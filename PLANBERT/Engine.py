@@ -105,7 +105,7 @@ def test(model, generator, pred_window):
 
 def predict(model, generator, pred_window):
     predict_list = []
-    for iter, batch in enumerate(tqdm(generator, ncols=60)):
+    for iter, batch in enumerate(generator):
         if iter == len(generator): break
         predict = model.predict_on_batch(batch[0])[0]
         predict_list.append(predict)
@@ -136,7 +136,7 @@ def test_wishlist(model, generator, pred_window):
 
 def predict_wishlist(model, generator, pred_window):
     predict_list = []
-    for iter, batch in enumerate(tqdm(generator, ncols=60)):
+    for iter, batch in enumerate(generator):
         if iter == len(generator): break
         wish_list = batch[0][0][:, pred_window[0]:pred_window[1]].sum(1)
         batch[0][0][:, pred_window[0]:pred_window[1]] = 0
