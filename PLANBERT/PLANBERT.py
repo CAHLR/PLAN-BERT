@@ -23,9 +23,9 @@ def dataframe2dict(csv):
     return user_dict
 
 
-class PLANBERT:
+class model:
     def __init__(self,
-                 num_times, num_items, feat_dims, cuda_num,
+                 num_times, num_items, feat_dims, cuda_num, master_csv=None,
                  num_layers=2, num_hidden_dims=2**9, num_heads=8,
                  transformer_dropout=0.2, embedding_dropout=0.2,
                  l2_reg_penalty_weight=0, confidence_penalty_weight=0.1,
@@ -33,9 +33,15 @@ class PLANBERT:
                  checkpoint=None
                 ):
 
-        self.__num_times = num_times
-        self.__num_items = num_items
-        self.__feat_dims = feat_dims
+        if master_csv:
+            self.__num_times = master_csv.iloc[:, 1].max() + 1
+            self.__num_items = master_csv.iloc[:, 2].max() + 1
+            self.__feat_dims = [master_csv.iloc[:, iter].max() + 1 for iter in range(3, master_csv.shape[1])]
+        else:
+            self.__num_times = num_times
+            self.__num_items = num_items
+            self.__feat_dims = feat_dims
+
         self.__num_layers = num_layers
         self.__num_hidden_dims = num_hidden_dims
         self.__num_heads = num_heads
@@ -143,7 +149,9 @@ class PLANBERT:
         self.model.save_weights(path)
 
 
-    def predict(self, test_data, mode, num_history, batch_size=16):
+    def predict(self, test_data, mode, history_dict):
+        # history_dict: { user_id: num_history }
+
         if type(test_data) == pd.DataFrame:
             test_dict = dataframe2dict(test_data)
         else:
@@ -151,12 +159,18 @@ class PLANBERT:
             test_dict = test_data
 
         assert(mode in ['time', 'wishlist'])
-        test_generator_config = {'name':'None', 'pool_sampling': False, 'batch_size': batch_size, 'shuffle': False, 'fixed_seed': True}
-        test_generator_config['sample_func'] = '(lambda x:x)'
-        test_generator_config['history_func'] = '(lambda x:0)'
-        test_generator = Generator.TimeMultihotGenerator(
-            test_dict, list(test_dict.keys()), self.__model_config, test_generator_config)
-        return Engine.predict(self.model, test_generator, pred_window=[num_history, self.__num_times])
+        test_generator_config = {'name':'None', 'pool_sampling': False, 'batch_size': 1, 'shuffle': False, 'fixed_seed': True}
+
+        result_dict = {}
+        for iter in history_dict:
+            num_history = history_dict[iter]
+            test_generator_config['sample_func'] = '(lambda x:x)'
+            test_generator_config['history_func'] = '(lambda x:{})'.format(num_history)
+            test_generator = Generator.TimeMultihotGenerator(
+                test_dict, [iter], self.__model_config, test_generator_config)
+            result_dict[iter] = Engine.predict(
+                self.model, test_generator, pred_window=[num_history, self.__num_times])
+        return result_dict
 
 
     def test(self, test_data, h_list, r_list, pool_size=None, batch_size=16):
