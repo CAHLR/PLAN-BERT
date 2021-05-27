@@ -39,19 +39,31 @@ Prepare csv data
 
 
 
-## Input and Output Data ##
+## Input Format ##
 
-The accepted input formats are Pandas DataFrames. The first three columns denotes the id of users, time slots, and items. Time slots are relative, which means the minimum time slots of any user are reocmmended to be 0. Since PLAN-BERT is a basket-level recommendation model, one time slot may contain multiple items. All following columns are undeerstood as features. User or item features are not distingushed in DataFrame, all features must be provided in each row. The names of all columns are arbitrary.
+The accepted input formats are Pandas DataFrames, which much includes columns 'user', 't', 'item'. Columns whose name include 'feat' would be considered as features. Time slots are relative, which means the minimum time slots of any user are reocmmended to be 0. Since PLAN-BERT is a basket-level recommendation model, one time slot may contain multiple items. All following columns are undeerstood as features. User or item features are not distingushed in DataFrame, all features must be provided in each row. The names of all columns are arbitrary.
 
 | 'user' | 't' | 'item' | 'feat_1' | 'feat_2' | ... |
 |:------:|:---:|:------:|:--------:|:--------:|:---:|
-| User1  | t1  | item1  |          |          |     |
-| User1  | t1  | item2  |          |          |     |
-| User1  | t2  | item3  |          |          |     |
-| User1  | t2  | item2  |          |          |     |
-| User1  | t3  | item4  |          |          |     |
-| User2  | t1  | item1  |          |          |     |
+| User1  |  0  | item0  |          |          |     |
+| User1  |  0  | item1  |          |          |     |
+| User1  |  1  | item2  |          |          |     |
+| User1  |  2  | item1  |          |          |     |
+| User1  |  3  | item3  |          |          |     |
+| User2  |  0  | item0  |          |          |     |
 | ...    |     |        |          |          |     |
+
+The output of predict funtion includes 4 columns, 'user', 't', 'item', 'prob'. the number of future time slots is pred_time_slices, 't' start from the maximum historical time slots + 1. Each basket includes items_per_slice items, which are order by their predicted probability. We note that is the number of required future time slots (e.g., 3) + the length of history (e.g., 3) is greater than the width of PLAN-BERT (e.g., 5), several beginning time slots (3+3-5) would be droped out from input DataFrame,
+
+| 'user' | 't' | 'item' | 'prob' |
+|:------:|:---:|:------:|:------:|
+| User1  |  3  | item0  |        |
+| User1  |  3  | item1  |        |
+| User1  |  4  | item2  |        |
+| User1  |  5  | item1  |        |
+| User1  |  5  | item3  |        |
+| User2  |  3  | item0  |        |
+| ...    |     |        |        |
 
 ## Creating and Training Models ##
 
@@ -63,16 +75,25 @@ from PLANBERT.Model import PLANBERT
 import pandas as pd
 train_csv = pd.read_csv('../example/example_train.csv')
 valid_csv = pd.read_csv('../example/example_valid.csv')
-test_csv = pd.read_csv('../example/example_train.csv')
+test_csv = pd.read_csv('../example/example_test.csv')
 
 # Train a PLAN-BERT with training set and validation set without checkpoint.
-planbert = PLANBERT(0, 0, 0, 0, train_csv) # [ Number of time slots, Number of items, [Number of features], ID of GPU]
-planbert.fit(train_csv, valid_csv)
-planbert.test(test_csv, h_list=[9], r_list=[3], pool_size=25)
+
+#planbert = PLANBERT(num_times=6, num_items=10000, feat_dims=[5000, 1000], cuda_num=0) # [ Number of time slots, Number of items, [Number of features], ID of GPU]
+planbert = PLANBERT(master_csv) # Automatically extract network hyper-parameters from DataFrame.
+#planbert.fit(train_csv, valid_csv)
+$planbert.test(test_csv, h_list=[9], r_list=[3], pool_size=25)
 
 # Obtain the output schedule. We note that the test_csv should only include historical items and future reference items. We should sample test_csv before feeding it into planbert.predict.
-history_dict = {iter:6 for iter in test_csv['user'].unique()[:10]}
-predict = planbert.predict(test_csv, 'time', history_dict) # [Testing set, PLAN-BERT's mode ('time'/'wishlist'), Number of historical time slots]
+test_csv_history = test_csv[test_csv['t'] < 2]
+test_csv_future = test_csv[test_csv['t'] >= 2]
+predict = planbert.predict(
+    test_csv_history, # Historical DataFrame
+    test_csv_future, # Future DataFrame, whose columns 't' would be useless in 'wishlist' mode.
+    mode='time', # PLAN-BERT's mode (time/wishlist)
+    pred_time_slices=4, # The number of required time slots in the future schedule.
+    items_per_slice=20 # The number of required items in each future time slots.
+)
 ```
 # Internal Data Format #
 
