@@ -53,7 +53,8 @@ The accepted input formats are Pandas DataFrames, which much includes columns 'u
 | User2  |  0  | item0  |          |          |     |
 | ...    |     |        |          |          |     |
 
-The output of predict funtion includes 4 columns, 'user', 't', 'item', 'prob'. the number of future time slots is pred_time_slices, 't' start from the maximum historical time slots + 1. Each basket includes items_per_slice items, which are order by their predicted probability. We note that is the number of required future time slots (e.g., 3) + the length of history (e.g., 3) is greater than the width of PLAN-BERT (e.g., 5), several beginning time slots (3+3-5) would be droped out from input DataFrame,
+The output of predict funtion includes 4 columns, 'user', 't', 'item', 'prob'. the number of future time slots is pred_time_slices, 't' start from the maximum historical time slots + 1. Each basket includes items_per_slice items, which are order by their predicted probability. 
+The maximum predicted time slots + historical time slots can exceed the width of PLAnBERT. If the number of required future time slots (e.g., 3) + the length of history (e.g., 3) is greater than the width of PLAN-BERT (e.g., 5), several beginning time slots (3+3-5) would be droped out from input DataFrame. So 
 
 | 'user' | 't' | 'item' | 'prob' |
 |:------:|:---:|:------:|:------:|
