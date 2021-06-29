@@ -19,10 +19,10 @@ VERSION = '1.0'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    'Keras==2.3.1',
+    'Keras>=2.3.0',
     'numpy',
     'pandas',
-    'tensorflow-gpu',
+    'tensorflow',
     'tqdm']
 
 EXTRAS = {}
