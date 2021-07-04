@@ -6,7 +6,7 @@ Keras implementation of the PLAN-BERT. A Transformer-based sequential baskets re
     pip install PLANBERT
 ```
 
-Based on the paper http://askoski.berkeley.edu/~zp/papers/academic_plan_generation.pdf and TKDE paper. All scripts are written by Erzhuo Shao.
+Adapted from Shao, Guo, & Pardos ([AAAI 2021](https://ojs.aaai.org/index.php/AAAI/article/view/17751)) for a manuscript submitted to a special issue of TKDE (under review). Scripts by Erzhuo Shao.
 
 ## Requirements
 Keras==2.3.1
