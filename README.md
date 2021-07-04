@@ -1,6 +1,6 @@
 # PLAN-BERT
 
-Keras implementation of the PLAN-BERT. A Transformer-based sequential baskets recommender system, which incorporates future items.
+Keras implementation of PLAN-BERT: A Transformer-based sequential basket recommender algorithm that incorporates future item information.
 
 ```
     pip install PLANBERT
