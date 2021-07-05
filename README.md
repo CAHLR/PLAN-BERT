@@ -74,9 +74,9 @@ The process of creating and training models in PLAN-BERT resemble that of SciKit
 from PLANBERT.Model import PLANBERT
 # Load the training, validation, and testing set.
 import pandas as pd
-train_csv = pd.read_csv('../example/example_train.csv')
-valid_csv = pd.read_csv('../example/example_valid.csv')
-test_csv = pd.read_csv('../example/example_test.csv')
+master_csv = pd.read_csv('./example/example_master.csv')
+train_len, train_valid_len = 153681, 153681+31661
+train_csv, valid_csv, test_csv = master_csv.iloc[:train_len], master_csv.iloc[train_len:train_valid_len], master_csv.iloc[train_valid_len:]
 
 # Train a PLAN-BERT with training set and validation set without checkpoint.
 
