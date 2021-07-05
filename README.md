@@ -43,7 +43,7 @@ Prepare csv data
 
 The accepted input formats are Pandas DataFrames, which much includes columns 'user', 't', 'item'. Columns whose name include 'feat' would be considered as features. Time slots are relative, which means the minimum time slots of any user are reocmmended to be 0. Since PLAN-BERT is a basket-level recommendation model, one time slot may contain multiple items. All following columns are undeerstood as features. User or item features are not distingushed in DataFrame, all features must be provided in each row. The names of all columns are arbitrary.
 
-| 'user' | 't' | 'item' | 'feat_1'(Optional) | ... | 'feat_1'(Optional) |
+| 'user' | 't' | 'item' | 'feat_1'(Optional) | ... | 'feat_N'(Optional) |
 |:------:|:---:|:------:|:--------:|:--------:|:---:|
 | User1  |  0  | item0  |          |          |     |
 | User1  |  0  | item1  |          |          |     |
