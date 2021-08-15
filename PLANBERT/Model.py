@@ -1,24 +1,14 @@
 import tensorflow as tf
-import keras
-from keras import backend as K
-
 import numpy as np
 import pandas as pd
 from tqdm import trange
-import sys, os, pickle, importlib, random, tqdm, copy, json, time, argparse
-
+import sys, os, pickle, importlib, keras, random, tqdm, copy, json, time, argparse
+from keras import backend as K
 from tqdm import tqdm
-
-if '2.3' in keras.__version__:
-    from .PLANBERT_2_3 import Engine
-    from .PLANBERT_2_3.util import Datahelper as dh
-    from .PLANBERT_2_3.util import Generator as Generator
-    from .PLANBERT_2_3.model import PLANBERT as Transformer
-else:
-    from .PLANBERT_2_4 import Engine
-    from .PLANBERT_2_4.util import Datahelper as dh
-    from .PLANBERT_2_4.util import Generator as Generator
-    from .PLANBERT_2_4.model import PLANBERT as Transformer
+from . import Engine
+from .util import Datahelper as dh
+from .util import Generator as Generator
+from .model import PLANBERT as Transformer
 
 
 def dataframe2dict(csv):
@@ -27,7 +17,7 @@ def dataframe2dict(csv):
         csv = csv.join(
             pd.DataFrame(np.zeros(csv.shape[0]).astype(int), index=csv.index, columns=['t']))
     feat_list = ['t', 'item'] + [iter for iter in header_list if 'feat' in iter]
-
+    
     user_dict = {}
     temp = csv.groupby(by='user')
     for iter in temp:
@@ -37,20 +27,18 @@ def dataframe2dict(csv):
 
 class PLANBERT:
     def __init__(self,
-                 master_csv=None, num_times=0, num_items=0, feat_dims=[], cuda_num=0,
+                 master_csv=None, num_times=0, num_items=0, feat_dims=[], cuda_num=0, 
                  num_layers=2, num_hidden_dims=2**9, num_heads=8,
                  transformer_dropout=0.2, embedding_dropout=0.2,
                  l2_reg_penalty_weight=0, confidence_penalty_weight=0.1,
                  lrate=1e-4, seed=0,
                  checkpoint=None
                 ):
-
+        
         assert(
-            (type(master_csv)  == pd.DataFrame) or
+            (type(master_csv)  == pd.DataFrame) or 
             (num_times > 0 and num_items > 0)
         )
-        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-        tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
         if type(master_csv) == pd.DataFrame:
             self.__num_times = master_csv.iloc[:, 1].max() + 1
@@ -78,7 +66,7 @@ class PLANBERT:
 
         self.__model_config = {
             'num_times': self.__num_times, 'num_items': self.__num_items, 'feats': self.__feat_dims}
-
+        
         # Training Environment
         os.environ['CUDA_VISIBLE_DEVICES'] = str(self.__cuda_num)
         #session_config = tf.compat.v1.ConfigProto()
@@ -173,42 +161,36 @@ class PLANBERT:
         self, test_csv_history, test_csv_future, mode='time', pred_time_slices=5, items_per_slice=20):
         assert(mode in ['time', 'wishlist'])
         test_generator_config = {
-            'name':'None',
-            'pool_sampling': False,
-            'batch_size': 1,
-            'shuffle': False,
+            'name':'None', 
+            'pool_sampling': False, 
+            'batch_size': 1, 
+            'shuffle': False, 
             'fixed_seed': True}
-
+        
         history_dict = dataframe2dict(test_csv_history)
         future_dict = dataframe2dict(test_csv_future)
-
+        
         result_array = []
         for key in tqdm(history_dict.keys() | future_dict.keys()):
             history_iter = history_dict.get(key, [])
             future_iter = np.array(future_dict.get(key, []))
             his_num = 0 if len(history_iter) == 0 else history_iter[:, 0].max() + 1
-
+            
             if self.__num_times < his_num + pred_time_slices and len(history_iter) > 0:
                 history_iter[:, 0] -= (his_num + pred_time_slices - self.__num_times)
                 if mode == 'time' and len(future_iter) > 0:
                     future_iter[:, 0] -= (his_num + pred_time_slices - self.__num_times)
                 his_num = history_iter[:, 0].max() + 1
-
+                    
             if len(history_iter) > 0:
                 history_iter = history_iter[
                     (history_iter[:, 0] >= 0) * (history_iter[:, 0] < his_num)]
             if len(future_iter) > 0:
                 future_iter = future_iter[
                     (future_iter[:, 0] >= his_num) * (future_iter[:, 0] < self.__num_times)]
-
+                
             test_dict = {key: np.array(list(history_iter) + list(future_iter))}
-            #print('{0}:{1}-{2}:{3}'.format(
-            #    history_iter[:, 0].min(),
-            #    history_iter[:, 0].max() + 1,
-            #    future_iter[:, 0].min() if len(future_iter) > 0 else his_num,
-            #    future_iter[:, 0].max() + 1 if len(future_iter) > 0 else his_num,
-            #))
-
+            
             test_generator_config['sample_func'] = '(lambda x:x)'
             test_generator_config['history_func'] = '(lambda x:{})'.format(his_num)
             test_generator = Generator.TimeMultihotGenerator(
@@ -221,13 +203,13 @@ class PLANBERT:
                 schedule_iter = Engine.predict_wishlist(
                     self.model, test_generator, pred_window=[
                         his_num, his_num + pred_time_slices])[0]
-
-
+            
+            
             for t in range(pred_time_slices):
                 item_t = schedule_iter[t].argsort()[::-1][:items_per_slice]
                 prob = sorted(schedule_iter[t])[::-1][:items_per_slice]
                 result_array += list(zip(item_t*0 + key, item_t*0 + t + his_num, item_t, prob))
-
+                    
         return pd.DataFrame(result_array, columns=['user', 't', 'item', 'prob'])
 
 
@@ -253,8 +235,7 @@ class PLANBERT:
                 test_generator_config['name'] = 'H={0}_R={1}'.format(h, r)
                 test_generator = Generator.TimeMultihotGenerator(
                     test_dict, list(test_dict.keys()), self.__model_config, test_generator_config)
-
-                #print(test_generator.name)
+                
                 recall, recall_per_sem = Engine.test(self.model, test_generator, pred_window=[h, self.__num_times])
                 results_mat[h][r] = [recall, recall_per_sem]
                 recall, recall_per_sem = Engine.test_wishlist(self.model, test_generator, pred_window=[h, self.__num_times])

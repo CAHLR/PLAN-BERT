@@ -11,18 +11,18 @@ from setuptools import find_packages, setup, Command
 # Package meta-data.
 NAME = 'PLANBERT'
 DESCRIPTION = 'A Bi-directional Transformer based sequential baskets recommender which incorporates future items'
-URL = ''
+URL = 'https://github.com/CAHLR/PLAN-BERT'
 EMAIL = 'shaoerzhuo@gmail.com, zp@berkeley.edu'
 AUTHOR = 'Erzhuo Shao, Zachary A. Pardos'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '1.0'
+VERSION = '1.3'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
     'Keras>=2.3.0',
     'numpy',
     'pandas',
-    'tensorflow',
+    'tensorflow-gpu',
     'tqdm']
 
 EXTRAS = {}
