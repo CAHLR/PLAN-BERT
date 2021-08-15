@@ -6,7 +6,7 @@ Keras implementation of PLAN-BERT: A Transformer-based sequential basket recomme
     pip install PLANBERT
 ```
 
-Adapted from Shao, Guo, & Pardos ([AAAI 2021](https://ojs.aaai.org/index.php/AAAI/article/view/17751)) for a manuscript submitted to a special issue of TKDE (under review). Scripts by Erzhuo Shao.
+Adapted from Shao, Guo, & Pardos ([AAAI 2021](https://ojs.aaai.org/index.php/AAAI/article/view/17751)) for a manuscript submitted to TKDE (under review). Scripts by Erzhuo Shao.
 
 ## Requirements
 Keras>=2.3.1
@@ -22,7 +22,7 @@ tqdm
 You can simply run:
 ```
     pip install PLANBERT
-``` 
+```
 Alternatively, if `pip` poses some problems, you can clone the repository as such and then run the `setup.py` script manually.
 
 ```
@@ -105,5 +105,5 @@ predict = planbert.predict(
         | 0  0  1  0  0  0 |   
 
 The above example shows the schedule of one user. It is of shape [5, 6], in which 5 is the number of time slots, 6 is the number of items. Similarly, the output of PLAN-BERT is of shape [ U, T, I ], where U is the number of users, T is the number of time slots, I is the number of items.
-  
+
   
