@@ -9,8 +9,9 @@ Keras implementation of PLAN-BERT: A Transformer-based sequential basket recomme
 Adapted from Shao, Guo, & Pardos ([AAAI 2021](https://ojs.aaai.org/index.php/AAAI/article/view/17751)) for a manuscript submitted to TKDE (under review). Scripts by Erzhuo Shao.
 
 ## Requirements
-Tensorflow=2.0.0 / 2.2.0
-Keras=2.3.1 / 2.4.0
+Python = 3.6
+Tensorflow = 2.0.0 / 2.2.0
+Keras = 2.3.1 / 2.4.0
 numpy
 pandas
 tqdm
