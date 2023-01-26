@@ -6,7 +6,7 @@ Keras implementation of PLAN-BERT: A Transformer-based sequential basket recomme
     pip install PLANBERT
 ```
 
-Adapted from Shao, Guo, & Pardos ([AAAI 2021](https://ojs.aaai.org/index.php/AAAI/article/view/17751)) for a manuscript submitted to TKDE (under review). Scripts by Erzhuo Shao.
+Adapted from Shao, Guo, & Pardos ([AAAI 2021](https://ojs.aaai.org/index.php/AAAI/article/view/17751)). Scripts by Erzhuo Shao.
 
 ## Requirements
 Python = 3.6
